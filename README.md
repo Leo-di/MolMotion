@@ -1,55 +1,216 @@
-# MolMotion
+# MolMotion｜四肽分子轨迹生成与评估
 
-Slow–fast tetrapeptide trajectory generation and simulation-start selection. **Research preview**, not a validated general-purpose molecular simulator.
+**把分子的运动拆成缓慢变化的整体状态与快速波动，研究如何生成合理轨迹，并为后续物理模拟提供候选起点。**
 
-## What exists now
+本项目基于 MDGen 的四肽数据与几何表示开展研究，包含慢快双分支 Transformer、单尺度对照、轨迹评价及构象探索应用实验。目前为 **研究预览版 `0.1.0.dev0`**：支持安装和坐标轨迹评估，提供模型及研究脚本；公开预训练权重和从 PDB 到轨迹的一键生成流程尚未发布。
 
-- Actual hierarchical and single-scale Transformer implementations (`src/molmotion/model.py`).
-- Coordinate trajectory metrics (`src/molmotion/metrics.py`): peptide-bond validity, sliced velocity W1, torsional ACF, clashes and related diagnostics.
-- Original research training/evaluation runtime and isolated repair variants under `research/`.
-- Historical experiment tables and timestamped result snapshots under `results/`.
+[快速安装](#快速安装) · [如何调用](#如何调用) · [模型架构](#模型架构) · [实验结论](#实验结论) · [代码目录](#代码目录) · [发布路线](docs/PUBLISH_ZH.md)
 
-## Install locally
+## 我们想解决什么问题
 
-```sh
+同一个分子可以呈现多种三维构象。物理分子动力学模拟逐步计算原子的运动，短时间模拟往往只探索起点附近的一部分构象。我们研究两个问题：
+
+1. 模型能否从氨基酸序列和初始结构出发，生成结构合理、运动统计接近真实模拟的未来轨迹？
+2. 从生成轨迹中筛选合理构象作为模拟起点，在相同仿真步数下，能否探索更多构象？
+
+适用范围是当前数据中的**四肽体系**。没有验证任意长度蛋白质、药物结合预测或实验动力学精度。
+
+## 看看实际生成的轨迹
+
+![参考模拟与模型生成的四肽轨迹](docs/assets/trajectory.gif)
+
+图中是 45k EMA 检查点、固定验证集中的第一条 EHFR 示例，展示 16 个主链原子。原始时间间隔为 10 ps，未来 256 帧覆盖 2.56 ns。显示时做了刚体对齐以便观察；这不是模型额外预测的一步。随机生成轨迹不要求和参考轨迹逐帧重合，质量判断依赖下面的统计评价，不能只看视频。
+
+## 模型架构
+
+![MolMotion 慢快模型架构](docs/assets/architecture.png)
+
+| 环节 | 实现与含义 |
+|---|---|
+| 输入 | 四肽氨基酸序列、初始三维构象及随机噪声 |
+| 几何表示 | 每个残基 21 维：4 维旋转、3 维平移、7 组扭转角正余弦 |
+| 慢分支 | 12 层、宽度 768、12 个注意力头的因果 Transformer；预测 32 个慢状态 |
+| 快分支 | 16 层、宽度 768、12 个注意力头的条件 Transformer；生成 256 帧快残差 |
+| 分解方式 | 每 8 帧求均值得到慢状态；快残差在块内均值为零 |
+| 训练 | Flow Matching 与几何约束；原方案使用真实慢历史及真实慢条件 |
+| 推理 | 使用模型生成的慢历史与慢状态；不输入真实未来 |
+| 输出 | 特征恢复尺度、反标准化、几何解码后得到原子坐标 |
+| 单尺度 baseline | 同宽度的 28 层 Transformer，直接联合生成轨迹；参数量接近但计算量不完全相同 |
+
+示意图对应原始主方案；低学习率、慢分支 dropout、几何损失分支解耦属于另行实验的修复版本。代码中的低层 `generate()` 返回**归一化几何特征**，不是已经解码的原子坐标。
+
+## 快速安装
+
+推荐 Python 3.12；当前元数据要求 Python ≥3.10。已在 Python 3.12 的 CPU 环境测试安装与接口，完整 CUDA 训练依赖需另行配置。
+
+```bash
+git clone https://github.com/Leo-di/MolMotion.git
+cd MolMotion
+python -m venv .venv
+# macOS / Linux
+source .venv/bin/activate
+# Windows PowerShell 改用：.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 python -m pip install .
-# Optional neural-network component:
-python -m pip install '.[model]'
+python examples/check_install.py
+molmotion --help
 ```
+
+需要导入神经网络模型时，额外安装 PyTorch：
+
+```bash
+python -m pip install '.[model]'
+python -m unittest discover -s tests -v
+```
+
+也可以直接从 GitHub 安装：
+
+```bash
+python -m pip install 'molmotion-research @ git+https://github.com/Leo-di/MolMotion.git'
+```
+
+`examples/check_install.py` 使用合成数组检查接口，不代表已训练模型效果。**目前未发布 PyPI**，请不要使用 `pip install molmotion-research` 来寻找正式发行版。
+
+## 如何调用
+
+### 1. 评价已有坐标轨迹：已经可以调用
+
+```python
+from molmotion import evaluate_npz
+
+result = evaluate_npz("trajectory.npz")
+print("键长有效率：", result["bond_valid"])
+print("速度分布 W1：", result["velocity_sliced_w1"])
+print("扭转角 ACF 误差：", result["acf_mae"])
+```
+
+命令行等价用法：
+
+```bash
+molmotion evaluate trajectory.npz --output metrics.json
+```
+
+输入是包含以下成员的 NPZ，必须采用 MDGen atom14 的原子顺序：
+
+| 字段 | 形状 | 说明 |
+|---|---|---|
+| `generated` | `[B,T,4,14,3]` | 生成的原子坐标，单位 Å |
+| `reference` | `[B,T,4,14,3]` | 参考坐标，与生成数据有相同形状和帧间隔 |
+| `sequence_ids` | `[B,4]` | 残基编码，沿用 MDGen 定义 |
+| `atom_mask` | `[B,4,14]` | 实际存在原子的 0/1 掩码；须包含 N、CA、C、O |
+
+至少需要 3 帧。比较多个方法时，统一样本、帧数、是否包括初始帧及时间间隔。当前函数计算输入全部帧的 **pooled 指标**，不会自动做逐分子配对检验或置信区间估计。精简的 `*.plot.npz` 不含完整坐标，不能直接传入这个接口。
+
+| 指标 | 如何理解 |
+|---|---|
+| `bond_valid` ↑ | 残基间 C—N 键长在 1.1–1.6 Å 内的比例；不是全部化学有效性的证明 |
+| `velocity_sliced_w1` ↓ | 主链逐帧位移分布的 sliced W1；当前单位为 Å/帧，未除以时间间隔 |
+| `acf_mae` ↓ | 扭转角时间自相关曲线误差，反映运动的时间关联 |
+| `nonadjacent_clash_frame_fraction` ↓ | 指定非相邻残基间存在过近原子的帧比例 |
+| `motion_ratio` | 生成与参考的逐帧位移幅度比；需结合其他指标解释 |
+
+### 2. 调用模型：提供低层接口，尚未发布预训练流水线
 
 ```python
 from molmotion.model import HierarchicalDynamics, SingleScaleDynamics, generate
-from molmotion.metrics import metrics
+
+model = HierarchicalDynamics()
+# 此时是随机初始化模型，不能用于科学推断。
+# 需加载匹配的已训练权重、归一化参数，再准备以下输入：
+# initial [B,4,21]、geometry [B,4,7]、sequence [B,4]、feature_mask [B,4,21]
+# features, slow, residual = generate(
+#     model, initial, geometry, sequence, feature_mask,
+#     future=256, seed=42, slow_steps=16, fast_steps=32,
+# )
 ```
 
-`generate` currently takes encoded, normalized tensors: initial `[B,4,21]`, relative geometry `[B,4,7]`, sequence `[B,4]`, feature mask `[B,4,21]`, and a compatible trained model. It returns normalized features including the initial frame, slow states and residuals. **These are not atom coordinates**; MDGen geometry decoding and matching normalization are required. See the original runtime for that conversion. No weights are bundled, and randomly initialized output is not scientifically usable.
+已有编码与几何解码实现位于 `research/runtime/common_v2.py` 和 `dynamics.py`。把这些处理与检查点加载封装成稳定 API 是下一阶段工作；当前没有 `from_pretrained()`、PDB 一键输入或 `propose_seeds()` 公共接口。
 
-There is no `from_pretrained`, direct PDB-to-trajectory SDK, or one-call `propose_seeds` implementation in this preview. Do not substitute the proposed API for an existing capability.
+## 实验结论
 
-## Architecture and scope
+以下是 **2026-11-08 上午结果快照**，不表示之后仍在运行的实验已经结束。
 
-Four residues, 21 geometric features per residue, 256 future frames at 10 ps spacing. Eight-frame block means form 32 slow states. A causal 12-layer width-768 Transformer generates slow history; a conditional 16-layer width-768 Transformer generates zero-mean fast residuals. The single-scale comparator has 28 layers. Flow matching is trained with geometry penalties. Inference does not use true future frames. Original training uses true slow-history conditioning; rollout mismatch and slow-branch overfitting are active research issues.
+### 与单尺度 baseline 的固定预算比较
 
-## Reproduction dependencies
+同一训练种子 43、固定 65k 步、32 个验证分子的评估：
 
-`research/runtime` is the original environment-dependent experiment code, not a standalone installed trainer. It needs MDGen and its dependencies, prepared trajectory caches, split CSVs, a READY marker, normalization and checkpoint metadata. Set `MDGEN_REPO`, `V2_DATA`, and `V2_ROOT` for your environment. `configs/training-protocol.json` records the experimental budget. Exact training environments and self-contained commands still need consolidation; installation of the lightweight package alone does not reproduce full training.
+| 方法 | 键长有效率 ↑ | pooled 速度 W1 ↓ | pooled ACF MAE ↓ |
+|---|---:|---:|---:|
+| 慢快模型（我们） | 87.34% | 0.02320 | 0.02408 |
+| 单尺度 baseline | **95.29%** | 0.02443 | 0.02560 |
 
-## Results
+单尺度模型在键长有效率上领先约 **7.96 个百分点**。慢快模型的 pooled 动态指标较低；逐分子的 W1 配对差区间跨零，尚不能认定在各分子上稳定改善。详见 [`fixed-budget-summary.json`](results/fixed-budget-summary.json) 和 [证据状态](docs/STATUS.md)。这组对照没有证明慢快模型整体优于 baseline。
 
-Read [evidence status](docs/STATUS.md) before interpreting CSVs. The single-scale baseline currently leads in bond validity. Slow–fast decomposition has useful diagnostic and candidate-selection evidence, but not an established overall superiority. Equal-simulation-step coverage gains do not imply equal-wall-time gains.
+### 为什么排查慢状态
 
-## Release plan
+![慢状态条件诊断](docs/assets/oracle-diagnostic.png)
 
-1. Freeze complete analysis data, provenance and matched evaluation protocols.
-2. Audit code ownership and third-party notices, then select the original-code license.
-3. Package checkpoint loading, geometry conversion and a fixed four-residue example with regression tests.
-4. Add `generate`, `evaluate`, `export` and `propose_seeds` workflows; independently host licensed checkpoints.
-5. Validate a clean installation before any PyPI release. REST/gRPC/MCP services can follow later.
+该图对应 **45k、32 分子的诊断实验**。将自由滚动的慢状态替换为真实未来慢状态后，键长和动态统计明显改善，说明慢状态条件质量值得重点排查。**Oracle 使用真实未来信息，不能部署，也不能当作我们方法战胜 baseline 的结果。** 图中的 pooled 汇总与逐分子配对区间是两种聚合口径。
 
-See [third-party notices](THIRD_PARTY_NOTICES.md). No PyPI or model-hub release has been made.
+### 训练过程记录
 
-## 中文发布分析与数据索引
+![历史主训练的损失和梯度记录](docs/assets/training-curves.png)
 
-见 [可行性与发布路线](docs/RELEASE_PLAN_ZH.md)。`results/20261108-numeric-results-long.csv` 是最新导出的数值长表（含配置数值，需筛选）；`results/20261108-plot-file-catalog.csv` 记录 3388 个作图材料文件及校验和。轻量作图数组保存在本地分析数据目录，未作为大型原始数据上传。
+这张历史图展示修复后同一次主训练的损失、验证分量及梯度记录；训练线包含尾随均值，验证线不平滑。它不是最新 100k 实验的收敛结论，也不能用损失下降代替生成质量评价。
 
-Validation: wheel build and installation passed; `python -m unittest discover -s tests -v` passes three contract tests on CPU. These tests do not establish trained-model scientific quality.
+### 实际应用：帮助选择物理模拟起点
+
+32 个四肽、两组各 3 条 50 ps 模拟，在扣除起始构象所属分箱后，60° 构象分箱统计得到：
+
+- 模型起点组比原始起点组平均多探索 **2.6875 个新分箱**，配对区间为 **[1.09375, 4.1875]**。
+- **24/32** 个分子改善。
+- 这是**等仿真步数**下的结果。将 CPU 模型生成耗时计入总预算后，该短预算实验没有显示端到端时间收益。
+
+因此，目前应用价值是“提出值得进一步物理验证的起点”；还不能宣称替代物理模拟或整体加速。
+
+## 数据来源与代码基础
+
+- 数据：[MDGen tetrapeptide-sims](https://huggingface.co/datasets/bjing-mit/tetrapeptide-sims)。主训练协议记录 256 个训练分子、32 个验证分子；验证集上的结论不等于独立测试集结论。
+- 基础工作：[MDGen — Generative Modeling of Molecular Dynamics Trajectories](https://github.com/bjing2016/mdgen)。本项目使用其几何表示、解码工具和条件生成任务设置。
+- 研究变量：慢快分解、因果慢状态滚动、条件快残差与相关训练修复。
+- 参数量接近不代表 FLOPs、采样器评估次数、显存或耗时完全匹配。具体比较应以协议和日志为准。
+
+## 代码目录
+
+```text
+src/molmotion/          可安装的模型、指标、evaluate_npz 与 CLI
+examples/              可运行的安装检查
+tests/                 模型与指标契约测试
+research/runtime/      原主模型及单尺度训练、几何处理、生成评估
+research/repair-runtime/ 慢分支修复版本
+research/audits/        固定预算、收敛、修复与梯度诊断脚本
+research/mdgen-baseline/ MDGen baseline 训练评估实现
+research/applications/ 原起点选择、复核及等总耗时模拟实验
+configs/               主训练协议
+results/               历史结果、最新数值长表、作图文件索引
+docs/assets/           架构图、真实轨迹动图和结果图
+```
+
+研究脚本仍包含原实验的目录约定和配置要求，**不等于安装后可以直接一键复现全部实验**。见 [研究代码说明](research/README.md)。特定服务器的登录、自动排队和同步脚本没有作为公共 API 上传；权重、原始轨迹与训练缓存单独管理。
+
+## 作图数据与结果索引
+
+- [`experiment-index.csv`](results/experiment-index.csv)：历史实验／证据索引；行数不是独立实验数。
+- [`20261108-numeric-results-long.csv`](results/20261108-numeric-results-long.csv)：最新数值长表，包含配置数字，需按字段筛选。
+- [`20261108-plot-file-catalog.csv`](results/20261108-plot-file-catalog.csv)：3,388 份本地作图材料的相对路径、校验和与数组保留情况。
+- [`application-equal-steps-per-molecule.csv`](results/application-equal-steps-per-molecule.csv)：应用对照的逐分子结果。
+
+文件索引不是文件下载地址。精简作图数组目前保存在项目本地归档，没有全部上传 GitHub。复核必须区分不同检查点、预测长度、样本数、随机种子及预算。
+
+## 下一步如何发布给别人使用
+
+现在已经能通过 GitHub 安装并调用评估接口。完整模型工具的发布顺序是：
+
+1. 完成权利归属、第三方来源与许可证核对。
+2. 固定一份权重、模型配置、归一化参数、几何特征版本及校验和。
+3. 接通 PDB/序列处理、加载权重、生成、几何解码和轨迹导出；提供一个真实四肽端到端示例。
+4. 在干净环境验证安装和推理，建立结构、运动、运行时间回归测试。
+5. 发布 GitHub Release；代码包经 TestPyPI 验证后发布 PyPI，模型权重独立托管。
+
+具体命令与账号设置见 **[中文发布指南](docs/PUBLISH_ZH.md)**。当前没有自动上传 PyPI 或模型平台，也尚未登记建议的包名。
+
+## 许可与引用
+
+来源说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。MDGen 的 MIT 声明及文件级第三方条款应保留；本项目原创部分的最终许可证、数据和权重再分发许可尚待核对。源码可见不等于已经完成开源授权。
+
+引用本仓库时请注明版本／commit、实验配置与数据来源，并引用 MDGen 原工作。项目尚无单独论文或 DOI。

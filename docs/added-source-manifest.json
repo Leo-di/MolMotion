@@ -1,0 +1,86 @@
+[
+  {
+    "file": "research/audits/fixed_audit.py",
+    "origin": "overnight-baselines-20261107-v2/scripts/fixed_audit.py",
+    "source_sha256": "0a2fca8fd2b33a50e583cf8cde6401c574763088f774aeb67fec76307276a540",
+    "published_sha256": "0a2fca8fd2b33a50e583cf8cde6401c574763088f774aeb67fec76307276a540",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/audits/convergence_audit.py",
+    "origin": "overnight-baselines-20261107-v2/scripts/convergence_audit.py",
+    "source_sha256": "c3adccf2219a477b40d2e976d0bff25b9f5657db2ef69d97e2ac514268063eab",
+    "published_sha256": "c3adccf2219a477b40d2e976d0bff25b9f5657db2ef69d97e2ac514268063eab",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/audits/repair_audit.py",
+    "origin": "overnight-baselines-20261107-v2/scripts/repair_audit.py",
+    "source_sha256": "ff6403035572c693e4ccca6052b0effe65eec3119e2c435fc721e636b967d8b4",
+    "published_sha256": "ff6403035572c693e4ccca6052b0effe65eec3119e2c435fc721e636b967d8b4",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/audits/gradient_probe.py",
+    "origin": "overnight-baselines-20261107-v2/scripts/gradient_probe.py",
+    "source_sha256": "7e18f0442c3b8bdc9e1b581cfd8fc71c08f308b58b5347145a36220453dd0757",
+    "published_sha256": "7e18f0442c3b8bdc9e1b581cfd8fc71c08f308b58b5347145a36220453dd0757",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/audits/gradient_probe32.py",
+    "origin": "overnight-baselines-20261107-v2/scripts/gradient_probe32.py",
+    "source_sha256": "8e8bca0e441315e10a3219cad9ac048c434af3799dc4780d5eee67603ddf7395",
+    "published_sha256": "8e8bca0e441315e10a3219cad9ac048c434af3799dc4780d5eee67603ddf7395",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/audits/mdgen_diagnostics.py",
+    "origin": "overnight-baselines-20261107-v2/scripts/mdgen_diagnostics.py",
+    "source_sha256": "1c1dd93738549252875e299004c9df5bb3b82b3673ac2d844ddab5ce7ba8d92c",
+    "published_sha256": "1c1dd93738549252875e299004c9df5bb3b82b3673ac2d844ddab5ce7ba8d92c",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/audits/test_repairs.py",
+    "origin": "overnight-baselines-20261107-v2/scripts/test_repairs.py",
+    "source_sha256": "18e75969f49669830c51fd10c307f3691d90af42c33d8f4d862dc02fbea4eea1",
+    "published_sha256": "18e75969f49669830c51fd10c307f3691d90af42c33d8f4d862dc02fbea4eea1",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/mdgen-baseline/baseline.py",
+    "origin": "overnight-baselines-20261107-v2/mdgen/baseline.py",
+    "source_sha256": "9a943e7bd0fcea18e4631764963f28d47ef4c573475ec35c7c7385553c1ad930",
+    "published_sha256": "9a943e7bd0fcea18e4631764963f28d47ef4c573475ec35c7c7385553c1ad930",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/applications/seeded-md-pilot-20261107-v1/pilot.py",
+    "origin": "seeded-md-pilot-20261107-v1/pilot.py",
+    "source_sha256": "d435c9a817e240960762039d3df62cf03dedb83b5b811dc34c9ede5417e9ac9e",
+    "published_sha256": "d435c9a817e240960762039d3df62cf03dedb83b5b811dc34c9ede5417e9ac9e",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/applications/seeded-md-replication-20261107-v1/pilot.py",
+    "origin": "seeded-md-replication-20261107-v1/pilot.py",
+    "source_sha256": "efd7c6a4f479edc1e6099a74e1318dad3c29f47d65a7c6aea179449717f1b1a3",
+    "published_sha256": "efd7c6a4f479edc1e6099a74e1318dad3c29f47d65a7c6aea179449717f1b1a3",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/applications/seeded-md-timing-20261107-v1/timing.py",
+    "origin": "seeded-md-timing-20261107-v1/timing.py",
+    "source_sha256": "042861d1a00ba19165969e6de3fdbcfca508bad50c3540fbdb3eb87524671401",
+    "published_sha256": "042861d1a00ba19165969e6de3fdbcfca508bad50c3540fbdb3eb87524671401",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  },
+  {
+    "file": "research/applications/seeded-md-timing-20261107-v1/geometry.py",
+    "origin": "seeded-md-timing-20261107-v1/geometry.py",
+    "source_sha256": "65afa58667c6a5127258dc4e8b3e806a3a03e2bfe309fb0087694eab9760c4a2",
+    "published_sha256": "65afa58667c6a5127258dc4e8b3e806a3a03e2bfe309fb0087694eab9760c4a2",
+    "changes": "Replace machine-specific project roots with /path/to placeholders where present"
+  }
+]
