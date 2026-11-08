@@ -47,3 +47,9 @@ Read [evidence status](docs/STATUS.md) before interpreting CSVs. The single-scal
 5. Validate a clean installation before any PyPI release. REST/gRPC/MCP services can follow later.
 
 See [third-party notices](THIRD_PARTY_NOTICES.md). No PyPI or model-hub release has been made.
+
+## 中文发布分析与数据索引
+
+见 [可行性与发布路线](docs/RELEASE_PLAN_ZH.md)。`results/20261108-numeric-results-long.csv` 是最新导出的数值长表（含配置数值，需筛选）；`results/20261108-plot-file-catalog.csv` 记录 3388 个作图材料文件及校验和。轻量作图数组保存在本地分析数据目录，未作为大型原始数据上传。
+
+Validation: wheel build and installation passed; `python -m unittest discover -s tests -v` passes three contract tests on CPU. These tests do not establish trained-model scientific quality.

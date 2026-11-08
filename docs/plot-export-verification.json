@@ -1,0 +1,18 @@
+{
+  "h100": {
+    "files": 2418,
+    "bytes": 87464998,
+    "checksum_mismatches": [],
+    "omitted_npz_files": 73,
+    "captured_at": "2026-11-08T03:18:31.675735+00:00",
+    "data_export_errors": []
+  },
+  "h200": {
+    "files": 970,
+    "bytes": 10593730,
+    "checksum_mismatches": [],
+    "omitted_npz_files": 26,
+    "captured_at": "2026-11-08T03:18:13.706593+00:00",
+    "data_export_errors": []
+  }
+}
