@@ -1,0 +1,4 @@
+include LICENSE NOTICE THIRD_PARTY_NOTICES.md MODEL_CARD.md
+recursive-include examples *.py *.pdb *.md LICENSE-*
+recursive-include tests *.py
+recursive-include docs *.md *.json

@@ -1,0 +1,5 @@
+MolMotion
+Copyright 2026 MolMotion contributors
+
+Includes MDGen geometry utilities (MIT), copyright 2024 Bowen Jing, Hannes Stärk, Tommi Jaakkola, Bonnie Berger.
+Includes files carrying Apache-2.0 notices from AlQuraishi Laboratory and DeepMind Technologies Limited (2021). Original notices are retained in the vendored files.

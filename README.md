@@ -2,7 +2,7 @@
 
 **把分子的运动拆成缓慢变化的整体状态与快速波动，研究如何生成合理轨迹，并为后续物理模拟提供候选起点。**
 
-本项目基于 MDGen 的四肽数据与几何表示开展研究，包含慢快双分支 Transformer、单尺度对照、轨迹评价及构象探索应用实验。目前为 **研究预览版 `0.1.0.dev0`**：支持安装和坐标轨迹评估，提供模型及研究脚本；公开预训练权重和从 PDB 到轨迹的一键生成流程尚未发布。
+本项目基于 MDGen 的四肽数据与几何表示开展研究，包含慢快双分支 Transformer、单尺度对照、轨迹评价及构象探索应用实验。当前版本 **`0.1.0`** 提供四肽 PDB 输入、预训练权重加载、轨迹生成、评价和 PDB/XTC 导出。模型是研究级模型，质量边界见下方实验结果及 [模型卡](MODEL_CARD.md)。
 
 [快速安装](#快速安装) · [如何调用](#如何调用) · [模型架构](#模型架构) · [实验结论](#实验结论) · [代码目录](#代码目录) · [发布路线](docs/PUBLISH_ZH.md)
 
@@ -69,7 +69,7 @@ python -m unittest discover -s tests -v
 python -m pip install 'molmotion-research @ git+https://github.com/Leo-di/MolMotion.git'
 ```
 
-`examples/check_install.py` 使用合成数组检查接口，不代表已训练模型效果。**目前未发布 PyPI**，请不要使用 `pip install molmotion-research` 来寻找正式发行版。
+`examples/check_install.py` 使用合成数组检查接口，不代表已训练模型效果。正式发布完成后可用 `python -m pip install "molmotion-research[model]==0.1.0"`。GitHub 源码安装和 PyPI 安装提供相同的公共接口；模型权重在首次调用时单独下载。
 
 ## 如何调用
 
@@ -109,22 +109,44 @@ molmotion evaluate trajectory.npz --output metrics.json
 | `nonadjacent_clash_frame_fraction` ↓ | 指定非相邻残基间存在过近原子的帧比例 |
 | `motion_ratio` | 生成与参考的逐帧位移幅度比；需结合其他指标解释 |
 
-### 2. 调用模型：提供低层接口，尚未发布预训练流水线
+### 2. 输入四肽 PDB，生成未来轨迹
+
+安装 `.[model]` 后运行（CPU 可用于验证，GPU 建议用于采样）：
 
 ```python
-from molmotion.model import HierarchicalDynamics, SingleScaleDynamics, generate
+from molmotion import MolMotionPipeline
 
-model = HierarchicalDynamics()
-# 此时是随机初始化模型，不能用于科学推断。
-# 需加载匹配的已训练权重、归一化参数，再准备以下输入：
-# initial [B,4,21]、geometry [B,4,7]、sequence [B,4]、feature_mask [B,4,21]
-# features, slow, residual = generate(
-#     model, initial, geometry, sequence, feature_mask,
-#     future=256, seed=42, slow_steps=16, fast_steps=32,
-# )
+pipeline = MolMotionPipeline.from_pretrained("tetrapeptide-v0.1.0", device="cpu")
+trajectory = pipeline.generate("examples/IMCP.pdb", num_frames=256, num_samples=1, seed=42)
+trajectory.save_npz("output/trajectories.npz")
+trajectory.save_pdb("output/trajectory.pdb")
+trajectory.save_xtc("output/trajectory.xtc")
+print("键长有效率：", trajectory.bond_validity())
 ```
 
-已有编码与几何解码实现位于 `research/runtime/common_v2.py` 和 `dynamics.py`。把这些处理与检查点加载封装成稳定 API 是下一阶段工作；当前没有 `from_pretrained()`、PDB 一键输入或 `propose_seeds()` 公共接口。
+命令行：
+
+```bash
+molmotion generate examples/IMCP.pdb --device cpu --output-dir output/demo
+# 有 NVIDIA GPU 时可指定 --device cuda
+```
+
+首用下载约 1.24 GB 权重，默认缓存到 `~/.cache/molmotion/`。也可从 [v0.1.0 Release](https://github.com/Leo-di/MolMotion/releases/tag/v0.1.0) 下载 `config.json` 与 `model.safetensors` 到同一目录，将该目录传给 `from_pretrained`。加载会校验 SHA256、特征版本和归一化参数，不加载 pickle 检查点。
+
+输入必须是单链四肽，包含标准残基的全部重原子，且分子没有被周期性边界切断；本版本不处理封端、缺失侧链、配体或修饰残基。返回数组 `trajectory.coordinates` 为 `[样本数,257,4,14,3]`，单位 Å。第 0 帧保留输入坐标；后续 256 帧由模型生成并经几何解码。XTC 自动转换成 nm，帧时间单位 ps。XTC 有压缩量化误差，精确分析优先使用 NPZ。
+
+给定同形状参考坐标，可调用 `trajectory.evaluate(reference_coordinates)`。生成 NPZ 本身不包含真实未来，因此不能直接传给要求 `reference` 字段的 `evaluate_npz`。
+
+### 3. 筛选后续模拟的候选起点
+
+```python
+candidates = trajectory.propose_seeds(count=3)
+for candidate in candidates:
+    print(candidate["sample"], candidate["frame"], candidate["time_ps"])
+    # candidate["coordinates"] 为 [4,14,3]，单位 Å
+```
+
+先过滤不合理肽键与明显原子碰撞，再按扭转角差异贪心选择候选；样本不足会报错。这是构象候选筛选，不等于已通过能量或物理稳定性验证。完整 OpenMM 应用实验在 `research/applications/`，尚未封装成自动模拟服务。
 
 ## 实验结论
 
@@ -173,8 +195,8 @@ model = HierarchicalDynamics()
 ## 代码目录
 
 ```text
-src/molmotion/          可安装的模型、指标、evaluate_npz 与 CLI
-examples/              可运行的安装检查
+src/molmotion/          推理流水线、轨迹导出、模型、指标与 CLI
+examples/              安装检查与 MIT 许可的 IMCP 初始 PDB
 tests/                 模型与指标契约测试
 research/runtime/      原主模型及单尺度训练、几何处理、生成评估
 research/repair-runtime/ 慢分支修复版本
@@ -197,20 +219,16 @@ docs/assets/           架构图、真实轨迹动图和结果图
 
 文件索引不是文件下载地址。精简作图数组目前保存在项目本地归档，没有全部上传 GitHub。复核必须区分不同检查点、预测长度、样本数、随机种子及预算。
 
-## 下一步如何发布给别人使用
+## 发布与复现
 
-现在已经能通过 GitHub 安装并调用评估接口。完整模型工具的发布顺序是：
-
-1. 完成权利归属、第三方来源与许可证核对。
-2. 固定一份权重、模型配置、归一化参数、几何特征版本及校验和。
-3. 接通 PDB/序列处理、加载权重、生成、几何解码和轨迹导出；提供一个真实四肽端到端示例。
-4. 在干净环境验证安装和推理，建立结构、运动、运行时间回归测试。
-5. 发布 GitHub Release；代码包经 TestPyPI 验证后发布 PyPI，模型权重独立托管。
-
-具体命令与账号设置见 **[中文发布指南](docs/PUBLISH_ZH.md)**。当前没有自动上传 PyPI 或模型平台，也尚未登记建议的包名。
+- [GitHub Release v0.1.0](https://github.com/Leo-di/MolMotion/releases/tag/v0.1.0)：代码包、推理权重、配置与模型卡。
+- [PyPI 项目](https://pypi.org/project/molmotion-research/)：轻量代码分发，权重独立下载。
+- [中文维护者发布指南](docs/PUBLISH_ZH.md)：Trusted Publishing 配置与发布检查。
+- [模型卡](MODEL_CARD.md)：训练来源、权重选择、适用范围与局限。
+- 工程验证记录：`docs/release-validation.json`；单元与接口测试：`python -m unittest discover -s tests -v`。
 
 ## 许可与引用
 
-来源说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。MDGen 的 MIT 声明及文件级第三方条款应保留；本项目原创部分的最终许可证、数据和权重再分发许可尚待核对。源码可见不等于已经完成开源授权。
+MolMotion 原创代码和自训练模型按 Apache-2.0 发布；内置 MDGen 几何文件及样例数据按原始 MIT/Apache-2.0 许可保留声明。见 [LICENSE](LICENSE)、[NOTICE](NOTICE) 和 [第三方说明](THIRD_PARTY_NOTICES.md)。
 
 引用本仓库时请注明版本／commit、实验配置与数据来源，并引用 MDGen 原工作。项目尚无单独论文或 DOI。

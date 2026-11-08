@@ -1,17 +1,20 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "molmotion-research"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "Research code and evidence for slow-fast tetrapeptide trajectory generation"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "Apache-2.0 AND MIT"
+license-files = ["LICENSE", "NOTICE", "src/molmotion/_vendor/mdgen/LICENSE-*"]
 dependencies = ["numpy>=1.24"]
 
 [project.optional-dependencies]
-model = ["torch>=2.1"]
+model = ["torch>=2.1", "safetensors>=0.4", "dm-tree>=0.1.8", "mdtraj>=1.10"]
+release = ["build", "twine"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -23,3 +26,6 @@ molmotion = "molmotion.cli:main"
 Homepage = "https://github.com/Leo-di/MolMotion"
 Repository = "https://github.com/Leo-di/MolMotion"
 Issues = "https://github.com/Leo-di/MolMotion/issues"
+
+[tool.setuptools.package-data]
+"molmotion._vendor.mdgen" = ["LICENSE-*"]
