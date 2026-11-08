@@ -1,0 +1,7 @@
+﻿panel,method,molecules,bond_valid_percent,acf_mae_pooled,velocity_w1_pooled,source
+完整模型,单尺度 Transformer 30k,32,90.55204280155642,0.02935556854520525,0.025079034307466407,morning-review-20261107-v1/reports/paired30k/results.json
+完整模型,慢快 Transformer 30k,32,85.91520752269778,0.022653801100594655,0.021632016793307358,morning-review-20261107-v1/reports/paired30k/results.json
+完整模型,MDGen 同数据重训 30k,32,89.67250324254216,0.011060638087136405,0.03177659104020895,output/data/experiment-ledger-20261107/mdgen-matched-143774.json
+完整模型,MDGen 公开权重,32,98.52059014267186,0.009440796715872628,0.02284685628938097,mdgen-baseline-20261107-v1/reports/published/results.json
+快分支对照,固定慢轨迹 / 随机残差块,32,50.08511673151751,0.1318248850958688,0.05481262651426346,additional-baselines-20261107-v1/reports/residual-results.json
+快分支对照,固定慢轨迹 / 学习式快分支,32,85.91520752269778,0.022653801100594655,0.021632016793307358,additional-baselines-20261107-v1/reports/residual-results.json

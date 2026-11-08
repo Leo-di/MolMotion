@@ -1,0 +1,42 @@
+{
+  "status": "submitted_pending_resources_or_dependencies",
+  "purpose": "Full-capacity architecture and official MDGen comparisons",
+  "seeds": [
+    43,
+    44,
+    45
+  ],
+  "hierarchical_parameters": 309716010,
+  "single_scale_capacity_note": "approximately matched; exact parameters logged by trainer",
+  "base_updates": 100000,
+  "continuation_updates": 50000,
+  "target_updates": 150000,
+  "global_batch": 64,
+  "future_frames": 256,
+  "training_molecules": 256,
+  "validation_molecules": 32,
+  "test_loaded": false,
+  "architecture_lr_after100k": 5e-06,
+  "architecture_schedule_horizon": 100000,
+  "mdgen_target_updates": 100000,
+  "mdgen_continues_from": 30000,
+  "mdgen_seed": 43,
+  "excludes": [
+    "nv-h100-029"
+  ],
+  "priority": "Finish existing 100k pairs; MDGen 100k; lower-priority paired 150k continuations",
+  "epochs": "Random crops with replacement: steps and clip exposures, no finite-epoch claim",
+  "matched_comparison": "Same training split, crop seed stream, batch size and updates; capacity/solver/compute differ and must be reported",
+  "logging": {
+    "loss_every": 100,
+    "architecture_validation_every": 1000,
+    "architecture_generation_every": 5000,
+    "mdgen_generation_every": 10000,
+    "raw_trajectories": true,
+    "heatmaps": true,
+    "video": true,
+    "checkpoints": true
+  },
+  "scope": "No running job modified. No GPU sharing added. No promise of completing all queued training overnight.",
+  "submission_receipt": "reports/submission.json"
+}

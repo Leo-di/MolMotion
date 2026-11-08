@@ -1,0 +1,61 @@
+﻿panel,arm,metric,value
+All 32,teacher_history,long_bond_fraction,0.07153858625162127
+All 32,teacher_history,late_long_bond_fraction,0.07853190104166667
+All 32,teacher_history,bond_valid,0.8758916990920882
+All 32,teacher_history,acf_mae,0.036757051944732666
+All 32,teacher_history,velocity_sliced_w1,0.02020174267299075
+All 32,reverse_mixed_history,long_bond_fraction,0.10538261997405966
+All 32,reverse_mixed_history,late_long_bond_fraction,0.119384765625
+All 32,reverse_mixed_history,bond_valid,0.8434662775616083
+All 32,reverse_mixed_history,acf_mae,0.027879076344626292
+All 32,reverse_mixed_history,velocity_sliced_w1,0.03399195659868505
+All 32,long_bond_penalty,long_bond_fraction,0.11004377431906615
+All 32,long_bond_penalty,late_long_bond_fraction,0.13069661458333334
+All 32,long_bond_penalty,bond_valid,0.8398994811932555
+All 32,long_bond_penalty,acf_mae,0.026500472000667026
+All 32,long_bond_penalty,velocity_sliced_w1,0.024592571369351876
+All 32,rollout_bond_penalty,long_bond_fraction,0.07080901426718547
+All 32,rollout_bond_penalty,late_long_bond_fraction,0.076904296875
+All 32,rollout_bond_penalty,bond_valid,0.8550988975356679
+All 32,rollout_bond_penalty,acf_mae,0.026580205985477993
+All 32,rollout_bond_penalty,velocity_sliced_w1,0.02842752290954078
+DKFA,teacher_history,long_bond_fraction,0.41893644617380027
+DKFA,teacher_history,late_long_bond_fraction,0.53125
+DKFA,teacher_history,bond_valid,0.5706874189364461
+DKFA,teacher_history,acf_mae,0.02320497376578195
+DKFA,teacher_history,velocity_sliced_w1,0.08884823135745196
+DKFA,reverse_mixed_history,long_bond_fraction,0.4345006485084306
+DKFA,reverse_mixed_history,late_long_bond_fraction,0.484375
+DKFA,reverse_mixed_history,bond_valid,0.47341115434500647
+DKFA,reverse_mixed_history,acf_mae,0.0141400865146092
+DKFA,reverse_mixed_history,velocity_sliced_w1,0.08624593682570544
+DKFA,long_bond_penalty,long_bond_fraction,0.48378728923476005
+DKFA,long_bond_penalty,late_long_bond_fraction,0.5807291666666666
+DKFA,long_bond_penalty,bond_valid,0.46303501945525294
+DKFA,long_bond_penalty,acf_mae,0.018033725874764577
+DKFA,long_bond_penalty,velocity_sliced_w1,0.10370289570357444
+DKFA,rollout_bond_penalty,long_bond_fraction,0.19974059662775617
+DKFA,rollout_bond_penalty,late_long_bond_fraction,0.1875
+DKFA,rollout_bond_penalty,bond_valid,0.7029831387808041
+DKFA,rollout_bond_penalty,acf_mae,0.014096004622323173
+DKFA,rollout_bond_penalty,velocity_sliced_w1,0.08715195563035419
+AEHY,teacher_history,long_bond_fraction,0.40077821011673154
+AEHY,teacher_history,late_long_bond_fraction,0.4296875
+AEHY,teacher_history,bond_valid,0.5875486381322957
+AEHY,teacher_history,acf_mae,0.07068557398659843
+AEHY,teacher_history,velocity_sliced_w1,0.16744543455461625
+AEHY,reverse_mixed_history,long_bond_fraction,0.5084306095979247
+AEHY,reverse_mixed_history,late_long_bond_fraction,0.4791666666666667
+AEHY,reverse_mixed_history,bond_valid,0.4280155642023346
+AEHY,reverse_mixed_history,acf_mae,0.1265063030379159
+AEHY,reverse_mixed_history,velocity_sliced_w1,0.40814195138968545
+AEHY,long_bond_penalty,long_bond_fraction,0.5992217898832685
+AEHY,long_bond_penalty,late_long_bond_fraction,0.6328125
+AEHY,long_bond_penalty,bond_valid,0.383916990920882
+AEHY,long_bond_penalty,acf_mae,0.1608005506651742
+AEHY,long_bond_penalty,velocity_sliced_w1,0.11647507691057474
+AEHY,rollout_bond_penalty,long_bond_fraction,0.4565499351491569
+AEHY,rollout_bond_penalty,late_long_bond_fraction,0.4322916666666667
+AEHY,rollout_bond_penalty,bond_valid,0.4785992217898833
+AEHY,rollout_bond_penalty,acf_mae,0.11984649726322719
+AEHY,rollout_bond_penalty,velocity_sliced_w1,0.32920288482565635

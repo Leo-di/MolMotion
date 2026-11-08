@@ -1,0 +1,57 @@
+﻿evidence_id,类别,实验,比较或记录口径,进度,项目相对路径
+E01,数据,官方划分,256训练、32验证、32独立测试留出,固定,training/molecular-motion/next/data/selection.json
+E02,数据,原始文件清单,PDB/XTC固定版本及校验,固定,training/molecular-motion/next/data/source-files.json
+E03,数据,预处理代码,抽帧、对齐、几何特征与缓存,使用中,training/molecular-motion/next/scripts/prepare_scale.py
+E04,数据,再抽帧验证,10–320 ps、固定10.24 ns窗口、按分子区间,完成,output/data/server-results-20261107/csv/frame_sampling_summary.csv
+E05,数据,再抽帧逐片段,每分子2个窗口,完成,output/data/server-results-20261107/csv/frame_sampling_clips.csv
+E06,早期迭代,8/2四肽初版,完整时间、逐帧、打乱，各2种子20k,完成,training/molecular-motion/README.md
+E07,早期迭代,几何pilot与AE,几何权重；2×32 token；AE未过后续latent门槛,部分完成,training/molecular-motion/next/README.md
+E08,早期迭代,100k桥接,小数据几何/原时间，3种子,完成,training/molecular-motion/next/reports/bridge-summary-20261106.json
+E09,早期迭代,32/128规模,18项，结构与动态指标,完成,training/molecular-motion/scale-h100-20261106-v1/reports/results.json
+E10,早期迭代,128分子窗口与时序补充,12项，128/256帧,完成,training/molecular-motion/supplement-20261106-v1/reports/results.json
+E11,早期迭代,256四肽早期矩阵,约12.56M模型，时序×几何×3种子,完成,output/data/server-results-20261107/csv/historical_12M_baseline_runs.csv
+E12,架构,约310M慢快模型,因果慢Flow+条件快Flow,训练记录,training/molecular-motion/hierarchical-full-20261106-v1/README.md
+E13,架构,CPU统计基线,复制首帧、AR、粗状态、Gaussian、残差块,完成,output/data/server-results-20261107/csv/cpu_baselines_per_molecule.csv
+E14,架构,输出干预,移除、打乱、替换快残差,完成,training/molecular-motion/rapid-evidence-20261107-v1/reports/ablation45k-full32.json
+E15,架构,固定慢轨迹快分支对照,学习式条件残差 vs 无条件训练块,完成,training/molecular-motion/additional-baselines-20261107-v1/reports/residual-results.json
+E16,架构,单尺度与慢快同预算,32分子、30k、seed43，汇总与逐分子配对,完成,training/molecular-motion/morning-review-20261107-v1/reports/paired30k/results.json
+E17,架构,MDGen公开权重,同评估面板，原预算不同,完成,training/molecular-motion/mdgen-baseline-20261107-v1/reports/published/results.json
+E18,架构,MDGen同预算重训,相同数据、样本流及30k更新,完成,output/data/experiment-ledger-20261107/mdgen-matched-143774.json
+E19,架构,LaM-SLidE,同四肽适配协议,正式训练,training/molecular-motion/additional-baselines-20261107-v1/README.md
+E20,架构,TEMPO,独立H200双SDE协议,正式训练,training/molecular-motion/tempo-h200-4aa-20261107-v1/README.md
+E21,机制,时间分段键长,64帧一段，30k架构与45k Oracle,完成,training/molecular-motion/morning-review-20261107-v1/reports/horizon-bond-audit.json
+E22,机制,键长阈值复核,阈值敏感性与过长键,完成,training/molecular-motion/morning-review-20261107-v1/reports/bond-threshold-audit.json
+E23,机制,慢积分步数,16/32/64，自由滚动逐分子,完成,output/data/server-results-20261107/csv/ode_step_per_molecule.csv
+E24,机制,固定历史高精度参考,固定历史，Euler vs Dopri5,完成,output/data/server-results-20261107/csv/local_solver_reference.csv
+E25,机制,真实慢状态与自由生成,45k诊断，分子配对,完成,training/molecular-motion/rapid-evidence-20261107-v1/reports/oracle-coarse45k/results.json
+E26,机制,Oracle交叉,快条件×最终拼接的四组,完成,training/molecular-motion/oracle-factorial-20261107-v1/reports/results.json
+E27,机制,第8块重置,单块直接与滚动,完成,training/molecular-motion/rapid-evidence-20261107-v1/reports/midroll-reset45k-block08/results.json
+E28,机制,第16块重置,单块直接与滚动,完成,training/molecular-motion/rapid-evidence-20261107-v1/reports/midroll-reset45k/results.json
+E29,机制,第24块重置,单块直接与滚动,完成,training/molecular-motion/rapid-evidence-20261107-v1/reports/midroll-reset45k-block24/results.json
+E30,机制,第5–8块重置,四块对单块及自由生成,完成,training/molecular-motion/rapid-evidence-20261107-v1/reports/midroll-reset45k-block08-length4/results.json
+E31,机制,第13–16块重置,四块对单块及自由生成,完成,training/molecular-motion/rapid-evidence-20261107-v1/reports/midroll-reset45k-length4/results.json
+E32,机制,第21–24块重置,四块对单块及自由生成,完成,training/molecular-motion/rapid-evidence-20261107-v1/reports/midroll-reset45k-block24-length4/results.json
+E33,机制,慢状态分布收缩与冻结历史,H200 CPU，固定历史和自由滚动,完成,training/molecular-motion/h200-slow-rollout-cpu-20261107-v1/reports/h200-summary.json
+E34,修复,分支条件扰动,仅慢/仅快/弱双支,完成,training/molecular-motion/condition-ablation-20261107-v1/reports/ablation-results.json
+E35,修复,先验放宽,H200 CPU先验控制,完成,training/molecular-motion/slow-calibration-20261107-v1/reports/cpu-prior-control/results.json
+E36,修复,直接替换慢历史,50/25/10/5%，48步,完成,training/molecular-motion/self-rollout-short-20261107-v1/reports/comparison-history-dose-five.json
+E37,修复,软替换同窗口,10%片段内80/20，3训练种子,完成,training/molecular-motion/self-rollout-short-20261107-v1/reports/comparison-soft-seed-replication.json
+E38,修复,软替换换窗口和噪声,复用6个检查点，同32分子,完成,training/molecular-motion/self-rollout-short-20261107-v1/reports/comparison-soft-seed-fresh.json
+E39,修复,冻结快分支慢历史,全真、全自生和混合，末64帧,完成,training/molecular-motion/slow-mixed-history-20261107-v1/reports/late-bond-audit.json
+E40,修复,反向混合,冻结快分支，慢分支256步,完成,training/molecular-motion/slow-reverse-mixed-history-20261107-v1/results-143912.json
+E41,修复,最近真实锚点,训练种子43/47/53复核,完成,training/molecular-motion/slow-latest-anchor-recheck-20261107-v1/comparison-143928.json
+E42,修复,局部长键惩罚,143958全段结果,完成,training/molecular-motion/slow-long-bond-20261107-v1/results-143958.json
+E43,修复,局部长键诊断,143971前缀、后128帧与梯度,完成,output/data/experiment-ledger-20261107/bond-diagnosis-143971.json
+E44,修复,首帧自由生成32帧长键惩罚,143974，保留真锚点训练,完成,original-json/slurm-143974-results.json
+E45,修复,几何后处理,同首帧长度目标的小残基平移,完成,output/reports/coarse-translation-pilot-20261107/README.md
+E46,训练,中心化FP32注意力,固定批次重放、继续训练,完成,training/molecular-motion/stability-20261106-v2/reports/verification-result.json
+E47,训练,八小时续训,"142446，45k到73,617",完成,training/molecular-motion/morning-review-20261107-v1/reports/long-review/results.json
+E48,训练,训练验证轨迹,训练、验证、生成分开归档,持续,output/data/server-results-20261107/results_csv.zip
+E49,训练,新批逐日志行数值,分子训练逐日志行数据,快照,output/reports/molecular-story-20261107/slurm-molecular-curves.jsonl.gz
+E50,应用,等步数先导8分子,每臂3×50 ps，扣除起点,完成,training/molecular-motion/seeded-md-pilot-20261107-v1/results.json
+E51,应用,等步数新增24分子,同预算，扣除起点,完成,training/molecular-motion/seeded-md-replication-20261107-v1/results.json
+E52,应用,等步数合并与敏感性,合计32，60°/90°分箱,完成,training/molecular-motion/seeded-md-replication-20261107-v1/comparison.json
+E53,应用,等总耗时,32分子重跑，计入生成筛选CPU时间,完成,training/molecular-motion/seeded-md-timing-20261107-v1/results.json
+E54,展示,同首帧视频,固定验证样例,可播放,output/media/molecular-trajectory-demo-20261107/trajectory_closeup.mp4
+E55,展示,结构与误差滚动双栏图,四段键长和四块重置配对区间,可用,output/figures/course-talk-20261107/structure-and-rollout.png
+E56,训练,H200 新批逐日志行数值,分子早期训练及TEMPO,快照,output/reports/molecular-story-20261107/h200-molecular-curves.jsonl.gz
