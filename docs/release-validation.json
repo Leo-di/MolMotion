@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "kind": "engineering functional validation; not scientific benchmark",
+  "model_sha256": "867c1b8d104f4bbd4ac903d59fdf8a259a7e1d8aae1133750f2948b70990d4ed",
+  "checkpoint_step": 85000,
+  "model_parameters": 309716010,
+  "device": "cpu",
+  "platform": "macOS-26.5.1-arm64-arm-64bit",
+  "torch": "2.15.0",
+  "dtype": "float32",
+  "cpu_threads": 6,
+  "seed": 42,
+  "future_frames": 256,
+  "frames_including_initial": 257,
+  "atom_count": 29,
+  "load_seconds": 0.876771540963091,
+  "generation_seconds": 20.75853970798198,
+  "all_finite": true,
+  "initial_frame_max_error_angstrom": 0.0,
+  "bond_valid_single_example": 0.9987029831387808,
+  "xtc_pdb_max_error_nm": 0.0005002021789550781,
+  "xtc_last_time_ps": 2560.0,
+  "screening": {
+    "passed": true,
+    "selected": [
+      {
+        "sample": 0,
+        "frame": 81,
+        "time_ps": 810.0
+      },
+      {
+        "sample": 0,
+        "frame": 237,
+        "time_ps": 2370.0
+      },
+      {
+        "sample": 0,
+        "frame": 252,
+        "time_ps": 2520.0
+      }
+    ]
+  }
+}

@@ -45,7 +45,15 @@ class TrajectoryBatch:
         p=Path(path);p.parent.mkdir(parents=True,exist_ok=True);self._mdtraj(sample).save_pdb(str(p))
 
     def save_xtc(self,path,sample=0):
-        p=Path(path);p.parent.mkdir(parents=True,exist_ok=True);self._mdtraj(sample).save_xtc(str(p))
+        import tempfile
+        import shutil
+        p=Path(path);p.parent.mkdir(parents=True,exist_ok=True)
+        # MDTraj's XTC C extension expects ASCII filenames on some platforms.
+        # Write to the system temporary directory, then move with Python's Unicode-safe IO.
+        with tempfile.TemporaryDirectory(prefix="molmotion-xtc-") as directory:
+            temporary=Path(directory)/"trajectory.xtc"
+            self._mdtraj(sample).save_xtc(str(temporary))
+            shutil.copyfile(temporary,p)
 
     def propose_seeds(self,count=3):
         """Screen geometry and greedily diversify torsions; not an MD stability guarantee."""

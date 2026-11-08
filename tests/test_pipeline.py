@@ -28,6 +28,8 @@ class PipelineTests(unittest.TestCase):
         np.testing.assert_allclose(result.coordinates[:,0],np.repeat(x[None],2,axis=0))
         self.assertEqual(result.coordinates.shape,(2,17,4,14,3))
         result.save_npz(self.root/'out.npz');result.save_pdb(self.root/'out.pdb');result.save_xtc(self.root/'out.xtc')
+        result.save_xtc(self.root/'中文目录'/'轨迹.xtc')
+        self.assertEqual((self.root/'out.xtc').read_bytes(),(self.root/'中文目录'/'轨迹.xtc').read_bytes())
         p=md.load(str(self.root/'out.pdb'));t=md.load(str(self.root/'out.xtc'),top=str(self.root/'out.pdb'))
         self.assertEqual(p.n_atoms,29);self.assertEqual(t.n_frames,17)
         np.testing.assert_allclose(t.time,np.arange(17)*10.)
