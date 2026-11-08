@@ -28,4 +28,5 @@ Repository = "https://github.com/Leo-di/MolMotion"
 Issues = "https://github.com/Leo-di/MolMotion/issues"
 
 [tool.setuptools.package-data]
+"molmotion" = ["data/*"]
 "molmotion._vendor.mdgen" = ["LICENSE-*"]

@@ -29,3 +29,8 @@ class EvaluationAPITests(unittest.TestCase):
         self.data['atom_mask'][0,0,0]=0
         np.savez(self.path,**self.data)
         with self.assertRaisesRegex(ValueError,'backbone'):evaluate_npz(self.path)
+
+    def test_example_is_available_from_installed_package(self):
+        output=Path(self.directory.name)/"example.pdb"
+        subprocess.run([sys.executable,"-m","molmotion.cli","example","--output",str(output)],check=True,capture_output=True)
+        self.assertIn("ATOM",output.read_text())

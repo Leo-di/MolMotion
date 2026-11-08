@@ -17,7 +17,15 @@ def main():
     generate.add_argument("--samples",type=int,default=1)
     generate.add_argument("--seed",type=int,default=42)
     generate.add_argument("--output-dir",type=Path,required=True)
+    example=commands.add_parser("example",help="导出随包提供的 IMCP 四肽初始结构")
+    example.add_argument("--output",type=Path,default=Path("IMCP.pdb"))
     args=parser.parse_args()
+    if args.command == "example":
+        from importlib.resources import files
+        args.output.parent.mkdir(parents=True,exist_ok=True)
+        args.output.write_bytes(files("molmotion").joinpath("data/IMCP.pdb").read_bytes())
+        print(str(args.output))
+        return
     if args.command == "generate":
         from .pipeline import MolMotionPipeline
         pipe=MolMotionPipeline.from_pretrained(args.model,device=args.device)

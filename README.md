@@ -2,9 +2,9 @@
 
 **把分子的运动拆成缓慢变化的整体状态与快速波动，研究如何生成合理轨迹，并为后续物理模拟提供候选起点。**
 
-本项目基于 MDGen 的四肽数据与几何表示开展研究，包含慢快双分支 Transformer、单尺度对照、轨迹评价及构象探索应用实验。当前版本 **`0.1.0`** 提供四肽 PDB 输入、预训练权重加载、轨迹生成、评价和 PDB/XTC 导出。模型是研究级模型，质量边界见下方实验结果及 [模型卡](MODEL_CARD.md)。
+本项目基于 MDGen 的四肽数据与几何表示开展研究，包含慢快双分支 Transformer、单尺度对照、轨迹评价及构象探索应用实验。当前版本 **`0.1.0`** 提供四肽 PDB 输入、预训练权重加载、轨迹生成、评价和 PDB/XTC 导出。模型是研究级模型，质量边界见下方实验结果及 [模型卡](https://github.com/Leo-di/MolMotion/blob/v0.1.0/MODEL_CARD.md)。
 
-[快速安装](#快速安装) · [如何调用](#如何调用) · [模型架构](#模型架构) · [实验结论](#实验结论) · [代码目录](#代码目录) · [发布路线](docs/PUBLISH_ZH.md)
+[快速安装](#快速安装) · [如何调用](#如何调用) · [模型架构](#模型架构) · [实验结论](#实验结论) · [代码目录](#代码目录) · [发布路线](https://github.com/Leo-di/MolMotion/blob/v0.1.0/docs/PUBLISH_ZH.md)
 
 ## 我们想解决什么问题
 
@@ -17,13 +17,13 @@
 
 ## 看看实际生成的轨迹
 
-![参考模拟与模型生成的四肽轨迹](docs/assets/trajectory.gif)
+![参考模拟与模型生成的四肽轨迹](https://raw.githubusercontent.com/Leo-di/MolMotion/v0.1.0/docs/assets/trajectory.gif)
 
 图中是 45k EMA 检查点、固定验证集中的第一条 EHFR 示例，展示 16 个主链原子。原始时间间隔为 10 ps，未来 256 帧覆盖 2.56 ns。显示时做了刚体对齐以便观察；这不是模型额外预测的一步。随机生成轨迹不要求和参考轨迹逐帧重合，质量判断依赖下面的统计评价，不能只看视频。
 
 ## 模型架构
 
-![MolMotion 慢快模型架构](docs/assets/architecture.png)
+![MolMotion 慢快模型架构](https://raw.githubusercontent.com/Leo-di/MolMotion/v0.1.0/docs/assets/architecture.png)
 
 | 环节 | 实现与含义 |
 |---|---|
@@ -70,6 +70,13 @@ python -m pip install 'molmotion-research @ git+https://github.com/Leo-di/MolMot
 ```
 
 `examples/check_install.py` 使用合成数组检查接口，不代表已训练模型效果。正式发布完成后可用 `python -m pip install "molmotion-research[model]==0.1.0"`。GitHub 源码安装和 PyPI 安装提供相同的公共接口；模型权重在首次调用时单独下载。
+
+安装包自带一个获得许可的四肽初始结构，可直接导出并生成：
+
+```bash
+molmotion example --output IMCP.pdb
+molmotion generate IMCP.pdb --device cpu --output-dir output/demo
+```
 
 ## 如何调用
 
@@ -161,17 +168,17 @@ for candidate in candidates:
 | 慢快模型（我们） | 87.34% | 0.02320 | 0.02408 |
 | 单尺度 baseline | **95.29%** | 0.02443 | 0.02560 |
 
-单尺度模型在键长有效率上领先约 **7.96 个百分点**。慢快模型的 pooled 动态指标较低；逐分子的 W1 配对差区间跨零，尚不能认定在各分子上稳定改善。详见 [`fixed-budget-summary.json`](results/fixed-budget-summary.json) 和 [证据状态](docs/STATUS.md)。这组对照没有证明慢快模型整体优于 baseline。
+单尺度模型在键长有效率上领先约 **7.96 个百分点**。慢快模型的 pooled 动态指标较低；逐分子的 W1 配对差区间跨零，尚不能认定在各分子上稳定改善。详见 [`fixed-budget-summary.json`](https://github.com/Leo-di/MolMotion/blob/v0.1.0/results/fixed-budget-summary.json) 和 [证据状态](https://github.com/Leo-di/MolMotion/blob/v0.1.0/docs/STATUS.md)。这组对照没有证明慢快模型整体优于 baseline。
 
 ### 为什么排查慢状态
 
-![慢状态条件诊断](docs/assets/oracle-diagnostic.png)
+![慢状态条件诊断](https://raw.githubusercontent.com/Leo-di/MolMotion/v0.1.0/docs/assets/oracle-diagnostic.png)
 
 该图对应 **45k、32 分子的诊断实验**。将自由滚动的慢状态替换为真实未来慢状态后，键长和动态统计明显改善，说明慢状态条件质量值得重点排查。**Oracle 使用真实未来信息，不能部署，也不能当作我们方法战胜 baseline 的结果。** 图中的 pooled 汇总与逐分子配对区间是两种聚合口径。
 
 ### 训练过程记录
 
-![历史主训练的损失和梯度记录](docs/assets/training-curves.png)
+![历史主训练的损失和梯度记录](https://raw.githubusercontent.com/Leo-di/MolMotion/v0.1.0/docs/assets/training-curves.png)
 
 这张历史图展示修复后同一次主训练的损失、验证分量及梯度记录；训练线包含尾随均值，验证线不平滑。它不是最新 100k 实验的收敛结论，也不能用损失下降代替生成质量评价。
 
@@ -208,14 +215,14 @@ results/               历史结果、最新数值长表、作图文件索引
 docs/assets/           架构图、真实轨迹动图和结果图
 ```
 
-研究脚本仍包含原实验的目录约定和配置要求，**不等于安装后可以直接一键复现全部实验**。见 [研究代码说明](research/README.md)。特定服务器的登录、自动排队和同步脚本没有作为公共 API 上传；权重、原始轨迹与训练缓存单独管理。
+研究脚本仍包含原实验的目录约定和配置要求，**不等于安装后可以直接一键复现全部实验**。见 [研究代码说明](https://github.com/Leo-di/MolMotion/blob/v0.1.0/research/README.md)。特定服务器的登录、自动排队和同步脚本没有作为公共 API 上传；权重、原始轨迹与训练缓存单独管理。
 
 ## 作图数据与结果索引
 
-- [`experiment-index.csv`](results/experiment-index.csv)：历史实验／证据索引；行数不是独立实验数。
-- [`20261108-numeric-results-long.csv`](results/20261108-numeric-results-long.csv)：最新数值长表，包含配置数字，需按字段筛选。
-- [`20261108-plot-file-catalog.csv`](results/20261108-plot-file-catalog.csv)：3,388 份本地作图材料的相对路径、校验和与数组保留情况。
-- [`application-equal-steps-per-molecule.csv`](results/application-equal-steps-per-molecule.csv)：应用对照的逐分子结果。
+- [`experiment-index.csv`](https://github.com/Leo-di/MolMotion/blob/v0.1.0/results/experiment-index.csv)：历史实验／证据索引；行数不是独立实验数。
+- [`20261108-numeric-results-long.csv`](https://github.com/Leo-di/MolMotion/blob/v0.1.0/results/20261108-numeric-results-long.csv)：最新数值长表，包含配置数字，需按字段筛选。
+- [`20261108-plot-file-catalog.csv`](https://github.com/Leo-di/MolMotion/blob/v0.1.0/results/20261108-plot-file-catalog.csv)：3,388 份本地作图材料的相对路径、校验和与数组保留情况。
+- [`application-equal-steps-per-molecule.csv`](https://github.com/Leo-di/MolMotion/blob/v0.1.0/results/application-equal-steps-per-molecule.csv)：应用对照的逐分子结果。
 
 文件索引不是文件下载地址。精简作图数组目前保存在项目本地归档，没有全部上传 GitHub。复核必须区分不同检查点、预测长度、样本数、随机种子及预算。
 
@@ -223,12 +230,12 @@ docs/assets/           架构图、真实轨迹动图和结果图
 
 - [GitHub Release v0.1.0](https://github.com/Leo-di/MolMotion/releases/tag/v0.1.0)：代码包、推理权重、配置与模型卡。
 - [PyPI 项目](https://pypi.org/project/molmotion-research/)：轻量代码分发，权重独立下载。
-- [中文维护者发布指南](docs/PUBLISH_ZH.md)：Trusted Publishing 配置与发布检查。
-- [模型卡](MODEL_CARD.md)：训练来源、权重选择、适用范围与局限。
+- [中文维护者发布指南](https://github.com/Leo-di/MolMotion/blob/v0.1.0/docs/PUBLISH_ZH.md)：Trusted Publishing 配置与发布检查。
+- [模型卡](https://github.com/Leo-di/MolMotion/blob/v0.1.0/MODEL_CARD.md)：训练来源、权重选择、适用范围与局限。
 - 工程验证记录：`docs/release-validation.json`；单元与接口测试：`python -m unittest discover -s tests -v`。
 
 ## 许可与引用
 
-MolMotion 原创代码和自训练模型按 Apache-2.0 发布；内置 MDGen 几何文件及样例数据按原始 MIT/Apache-2.0 许可保留声明。见 [LICENSE](LICENSE)、[NOTICE](NOTICE) 和 [第三方说明](THIRD_PARTY_NOTICES.md)。
+MolMotion 原创代码和自训练模型按 Apache-2.0 发布；内置 MDGen 几何文件及样例数据按原始 MIT/Apache-2.0 许可保留声明。见 [LICENSE](https://github.com/Leo-di/MolMotion/blob/v0.1.0/LICENSE)、[NOTICE](https://github.com/Leo-di/MolMotion/blob/v0.1.0/NOTICE) 和 [第三方说明](https://github.com/Leo-di/MolMotion/blob/v0.1.0/THIRD_PARTY_NOTICES.md)。
 
 引用本仓库时请注明版本／commit、实验配置与数据来源，并引用 MDGen 原工作。项目尚无单独论文或 DOI。
